@@ -188,7 +188,7 @@ parser.add_argument(
 )
 parser.add_argument(
     '--server',
-    default="192.168.0.35",
+    default="server.local",
     type=str,
     metavar="ADDRESS",
     help="Server's address ; can be an IPv4, IPv6 or a DNS name."
@@ -221,17 +221,17 @@ parser.add_argument(
 )
 parser.add_argument(
     '--excludedPorts',
-    default=[0, 21, 22, 80, 443, 1666, 62355],
+    default=[0, 21, 22, 80, 443],
     type=int,
     nargs="+",
     metavar="PORT",
-    help="Lists all the ports that shouldn't be used."
+    help="Lists the ports that shouldn't be used."
 )
 parser.add_argument(
     '--maxPort',
     default=65536,
     type=int,
-    help="Number of ports that can be used (0 included)."
+    help="Number of ports that can be used (from 0, included)."
 )
 parser.add_argument(
     '--openSequence',
@@ -242,7 +242,7 @@ parser.add_argument(
 )
 parser.add_argument(
     '--closeSequence',
-    default=[5008, 25089, 11986],
+    default=[10000, 20000, 30000],
     type=int,
     nargs=3,
     metavar=("PORT1", "PORT2", "PORT3"),
