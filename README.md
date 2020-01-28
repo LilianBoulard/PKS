@@ -17,6 +17,7 @@ However, it is not flawless, so it's not advised, in its current state, to use i
 
 ## Future work
 As of February 2020, the main future work is to proofread the code, debug and test.<br />
+Also, Windows support for the daemon would be appreciated.<br />
 New features requests are welcome.<br />
 
 ## Usage
