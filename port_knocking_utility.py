@@ -122,38 +122,40 @@ def process_db(mode, data = '', isHashed = False):
     # Raises KeyError if the mode specified is not in the dictionnary.
     writeMode = acceptedModes[mode]
     while "checks if the password is 8 bit long":
-        if not args.blockchainPassword:
-            args.blockchainPassword = args.blockchainPassword if args.blockchainPassword else getpass("Please enter password to use on the pseudo-blockchain file\n>")
-        if args.blockchainPassword:
-            if len(args.blockchainPassword) != 8:
-                print("Invalid key for the blockchain file. Must be 8 bit long, is {}.".format(len(args.blockchainPassword)))
-                args.blockchainPassword = None
+        if not args.databasePassword:
+            args.databasePassword = args.databasePassword if args.databasePassword else getpass("Please enter 8-character key of the pseudo-database file\n>")
+        if args.databasePassword:
+            if len(args.databasePassword) != 8:
+                print("Invalid key for the database file. Must be 8 bit long, is {}.".format(len(args.databasePassword)))
+                args.databasePassword = None
             else:
                 break
-    with open(args.blockchainFile, writeMode) as db:
+    with open(args.databaseFile, writeMode) as db:
         if mode == "read":
             # Retrieve database file content.
-            content = Encryption.manipulate_des("DECRYPT", db.read(), args.blockchainPassword)
+            content = Encryption.sym_decrypt(db.read(), args.databasePassword)
             if not content: # If the database file is empty
                 print("The database file is emtpy. Launching initialization.")
                 # Launch database initialization
                 process_db("init")
                 process_db(mode, isHashed)
-                print("The database has been initialized.")
-                # Reads the database again and returns its content.
-                return Encryption.manipulate_des("DECRYPT", db.read(), args.blockchainPassword)
-            else: # If the database file is not empty
-                return content
+                # Reads the database again
+                content = Encryption.sym_decrypt(db.read(), args.databasePassword)
+            if content.find(b'\\') != -1:
+                raise Exception("Could not decrypt the database : wrong password.")
+            return content
         elif mode == "init":
-            passphrase = Encryption.manipulate_des("ENCRYPT", Encryption.hash(input("Please enter a passphrase to initialize the database\n> ")), args.blockchainPassword)
+            args.databasePassphrase = args.databasePassphrase if args.databasePassphrase else input("Please enter a passphrase to initialize the database\n> ")
+            passphrase = Encryption.sym_encrypt(Encryption.hash(args.databasePassphrase), args.databasePassword)
             db.write(passphrase)
+            print("The database has been initialized.")
         elif mode == "append":
             if isHashed: # If the data is already hashed
                 # Write it to the file
-                db.write(Encryption.manipulate_des("ENCRYPT", data, args.blockchainPassword))
+                db.write(Encryption.sym_encrypt(data, args.databasePassword))
             else: # If the data is not hashed
                 # Hash then write it
-                db.write(Encryption.manipulate_des("ENCRYPT", Encryption.hash(data), args.blockchainPassword))
+                db.write(Encryption.sym_encrypt(Encryption.hash(data), args.databasePassword))
         # Close the file
         db.close()
     return
@@ -216,7 +218,9 @@ def merge_args(newArgs):
             print("WARNING: Invalid argument in config file : {}".format(arg))
             pass
 
-class Client:
+
+class Client(object):
+
     def get_remote_value(self, ssh, command, valueName, nargs = 1):
         """
         Gets a value from a remote computer using SSH.
@@ -367,7 +371,9 @@ class Client:
             input("The content of file \"{}\" ({}) is not format expected for an open sequence.\nFormat needed is \"PORT, PORT, PORT\".".format(remoteValues["openSequenceFileLocation"], remoteValues["openSequenceFileContent"]))
             print(remoteValues)
 
+
 class Server(daemon3x.Daemon):
+
     def get_sleep_time(self):
         """
         Returns the time left (in seconds) before the next round hour.
@@ -381,9 +387,9 @@ class Server(daemon3x.Daemon):
         """
         from subprocess import call
         if utility == "systemctl":
-            command = "sudo {} restart {}".format(utility, service)
+            command = "sudo systemctl restart {}".format(service)
         elif utility == "service":
-            command = "sudo {} {} restart".format(utility, service)
+            command = "sudo service {} restart".format(service)
         call(command, shell = True)
         return
 
@@ -400,7 +406,9 @@ class Server(daemon3x.Daemon):
         # Sleep until the next hour
         sleep(self.get_sleep_time())
 
-class XML:
+
+class XML(object):
+
     def get_xml_config(configFile):
         """
         Parse an XML config file to get contained arguments.
@@ -440,7 +448,10 @@ class XML:
             pass
         return
 
-class Encryption:
+
+class Encryption(object):
+
+    @staticmethod
     def generate_salt(nb):
         """
         Generates a salt of "nb" lenght.
@@ -480,12 +491,13 @@ class Encryption:
                 # Converts an hexadecimal letter to its decimal equivalent
                 character = ord(character) - 87
             # Adds to the variable finalNumber the result calculated previously (an integer)
-            finalNumber += character*(16**index)
+            finalNumber += character * (16 ** index)
         return finalNumber
 
-    def manipulate_des(mode, data, key):
+    @staticmethod
+    def get_des(key):
         """
-        Wrapper used to manipulate DES encryption, using pyDes module.
+        Returns DES encryption object and padmode.
         Documentation : http://whitemans.ca/des.html
         """
         try:
@@ -493,17 +505,33 @@ class Encryption:
         except ImportError:
             install_module("pyDes")
             import pyDes
-        # Converts data to bytes if it is not already
-        data = data if type(data) == bytes else str(data).encode(charset)
         # Sets which padmode to use
         padmode = pyDes.PAD_PKCS5
         # Creates a DES key
-        k = pyDes.des(key.encode(charset), pyDes.CBC, "\0\0\0\0\0\0\0\0", pad=None, padmode=padmode)
-        # Returns the encoded or decoded text
-        if mode == "ENCRYPT":
-            return k.encrypt(data, padmode=padmode)
-        elif mode == "DECRYPT":
-            return k.decrypt(data, padmode=padmode)
+        k = pyDes.des(key.encode(charset), pyDes.CBC, "\0\0\0\0\0\0\0\0", pad = None, padmode = padmode)
+        return [k, padmode]
+
+    @staticmethod
+    def sym_encrypt(data, key):
+        """
+        Encrypts the data received
+        """
+        # Gets DES object and padmode
+        k, padmode = Encryption.get_des(key)
+        # Converts data to bytes if it is not already
+        data = data if type(data) == bytes else str(data).encode(charset)
+        return k.encrypt(data, padmode = padmode)
+
+    @staticmethod
+    def sym_decrypt(data, key):
+        """
+        Decrypts the data received
+        """
+        # Gets DES object and padmode
+        k, padmode = Encryption.get_des(key)
+        # Converts data to bytes if it is not already
+        data = data if type(data) == bytes else str(data).encode(charset)
+        return k.decrypt(data, padmode = padmode)
 
 
 
@@ -531,13 +559,19 @@ parser.add_argument(
     help = "Server's address ; can be an IPv4, IPv6 or a DNS name."
 )
 parser.add_argument(
-    '--blockchainFile',
+    '--databaseFile',
     type = str,
     metavar = "PATH",
-    help = "Path and name (precise its extension) of the blockchain file ; can be relative or absolute."
+    help = "Path and name (precise its extension) of the database file ; can be relative or absolute."
 )
 parser.add_argument(
-    '--blockchainPassword',
+    '--databasePassphrase',
+    type = str,
+    metavar = "PASSPHRASE",
+    help = "Passphrase used to initialize the database."
+)
+parser.add_argument(
+    '--databasePassword',
     type = str,
     metavar = "PASSWORD",
     help = "Password used to encrypt and decrypt the database. It will be asked if the argument is not set."
@@ -582,7 +616,7 @@ parser.add_argument(
     type = int,
     nargs = 3,
     metavar = ("PORT1", "PORT2", "PORT3"),
-    help = "The three ports used for the open sequence. When specified, doesn't alter the blockchain file."
+    help = "The three ports used for the open sequence. When specified, doesn't alter the database file."
 )
 parser.add_argument(
     '--closeSequence',
@@ -685,7 +719,7 @@ defaultArgs = {
     "mode": "CLIENT",
     "closeMode": "AUTO",
     "server": "192.168.0.100",
-    "blockchainFile": "blockchain.db",
+    "databaseFile": "database.db",
     "sequenceFile": "open_sequence",
     # Following salt should not include these characters : ", \ and & (even escaped)
     # The recommended salt lenght should be 128 bits (source : https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf)
@@ -715,7 +749,7 @@ merge_args(defaultArgs)
 
 
 # Tries to open required files to test if they exists before proceeding further
-for filePath in [args.blockchainFile, args.sequenceFile, args.sshPrivateKeyFile]:
+for filePath in [args.databaseFile, args.sequenceFile, args.sshPrivateKeyFile]:
     if filePath != None:
         try:
             with open(filePath, "r+") as fl:
@@ -730,7 +764,7 @@ for filePath in [args.blockchainFile, args.sequenceFile, args.sshPrivateKeyFile]
 # List of excluded ports, that should not be used. Modify below list with ports that should be excluded by default.
 defaultExcludedPorts = [0, 21, 22, 80, 443]
 args.excludedPorts = defaultExcludedPorts + args.excludedPorts if args.excludedPorts else defaultExcludedPorts
-print("Excluded ports : {}".format(args.excludedPorts))
+print("Excluded ports : {}\n".format(args.excludedPorts))
 
 # Sets the charset used by the script
 charset = "utf-8"
