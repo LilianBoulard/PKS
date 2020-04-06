@@ -17,7 +17,7 @@ It's rather an experimental feature to build upon.<br />
 
 ## Future work
 As of March 2020, the main future work is to proofread the code, debug and test.<br />
-I'm mainly working on simplifying the code currently.<br />
+I'm currently working on simplifying the code.<br />
 Also, Windows support for the daemon would be appreciated.<br />
 New features requests are welcome.<br />
 
