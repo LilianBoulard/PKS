@@ -3,7 +3,7 @@ A port-knocking utility.
 
 ## Issue
 Opening a server publicly to the Internet implies major risks.<br />
-Along with different ways of securing this server, such as RSA keys for SSH connections, I learned about a system allowing outside connections "on-demand" using a knocking system, that will open a port once a sequence of packets is send to a series of ports.<br />
+Along with different ways of securing its access, such as RSA keys for SSH connections, I learned about a server-side system allowing outside connections "on-demand" using a knocking system, that will open a port once a specific sequence of packets is received.<br />
 
 A bunch of articles have already been written on the subject, such as this paper, which is pretty interesting and accurate :<br />
 https://www.sans.org/reading-room/whitepapers/sysadmin/port-knocking-basics-1634<br />
@@ -11,12 +11,14 @@ https://www.sans.org/reading-room/whitepapers/sysadmin/port-knocking-basics-1634
 It covers the main problem with port-knocking systems : static port-knocking.<br />
 
 ## Solution
-This script, written in Python 3, is an attempt to partly solve this issue by dynamically defining new ports based on a pseudo-blockchain system.<br />
+This script, written in Python 3, is an attempt to solve this issue by dynamically defining new ports sequences.<br />
 To reproduce the same behavior - and find the same ports on different computers - the script needs common salt, passphrase and password.<br />
-However, it is not flawless ; therefore it is not advised in its current state to use it in a production environment. It's rather an experimental feature to build upon.<br />
+However, it is not flawless ; therefore it is not advised in its current state to use it in a production environment. 
+It's rather an experimental feature to build upon.<br />
 
 ## Future work
-As of February 2020, the main future work is to proofread the code, debug and test.<br />
+As of March 2020, the main future work is to proofread the code, debug and test.<br />
+I'm mainly working on simplifying the code currently.<br />
 Also, Windows support for the daemon would be appreciated.<br />
 New features requests are welcome.<br />
 
