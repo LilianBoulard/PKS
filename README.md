@@ -12,7 +12,6 @@ It covers the main problem with port-knocking systems : static port-knocking.<br
 
 ## Solution
 This script, written in Python 3, is an attempt to solve this issue by dynamically defining new ports sequences.<br />
-To reproduce the same behavior - and find the same ports on different computers - the script needs common salt, passphrase and password.<br />
 However, it is not flawless ; therefore it is not advised in its current state to use it in a production environment. 
 It's rather an experimental feature to build upon.<br />
 
