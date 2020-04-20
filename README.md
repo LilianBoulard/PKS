@@ -1,6 +1,9 @@
 # Port-knocking
 A port-knocking utility. 
 
+# Important note, as of April 20th, 2020
+The script is being rewritted from scratch, please **do not** use it right now.
+
 ## Issue
 Opening a server publicly to the Internet implies major risks.<br />
 Along with different ways of securing its access, such as RSA keys for SSH connections, I learned about a server-side system allowing outside connections "on-demand" using a knocking system, that will open a port once a specific sequence of packets is received.<br />
