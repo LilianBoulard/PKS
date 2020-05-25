@@ -74,9 +74,9 @@ And you're good to go ! Next, read the below workflow !
 
 The workflow for the client is :
 - Setup the PKU client.
-- Connect to Telegram with your account, and send "/help" to the bot configured in the server part.
+- Connect to Telegram with your account, and send `/help` to the bot configured in the server part.
 - The list of available commands will appear.
-- Send "/generate" to the bot, it will answer a series of ports.
+- Send `/generate` to the bot, it will answer a series of ports.
 - Launch the PKU client, enter the password, the three ports (one by one), press enter, and a SSH shell should open.
 - If it doesn't, ask the person in charge of the server to check it is running and the configuration is correct.
 
