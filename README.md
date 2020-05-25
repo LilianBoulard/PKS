@@ -1,9 +1,6 @@
 # Port-knocking
 A port-knocking utility. 
 
-# Important note, as of April 20th, 2020
-The script is being rewritted from scratch, please **do not** use it right now.
-
 ## Issue
 Opening a server publicly to the Internet implies major risks.<br />
 Along with different ways of securing its access, such as RSA keys for SSH connections, I learned about a server-side system allowing outside connections "on-demand" using a knocking system, that will open a port once a specific sequence of packets is received.<br />
@@ -18,23 +15,59 @@ This script, written in Python 3, is an attempt to solve this issue by dynamical
 However, it is not flawless ; therefore it is not advised in its current state to use it in a production environment. 
 It's rather an experimental feature to build upon.<br />
 
-## Future work
-As of March 2020, the main future work is to proofread the code, debug and test.<br />
-I'm currently working on simplifying the code.<br />
-Also, Windows support for the daemon would be appreciated.<br />
-New features requests are welcome.<br />
-
 ## Usage
-Use the following command (Python 3) to list the options
+
+### Requirements
+
+**Server**
+
+*ONLY GNU/LINUX - Only tested on Debian/Ubuntu*
+
+To use the server, you will first need to [get a Telegram bot](https://core.telegram.org/bots#3-how-do-i-create-a-bot).
+It's easy and free !
+
+Next, modify the file `Server/pku/config.py` to fit your needs.
+
+Next, follow [this link](https://www.digitalocean.com/community/tutorials/how-to-use-port-knocking-to-hide-your-ssh-daemon-from-attackers-on-ubuntu) (also available in the docstring of the file `Server/setup.py`) and configure your server by following along the first part (IPTables ; be careful when modifying your iptables).
+> Update of the article : when installing `iptables-persistent`, the service is automatically launched, but you need to configure the saved rules with the command
+
+```bash
+cd ~ && touch rules.v4 && sudo iptables-save >> rules.v4 && sudo mv rules.v4 /etc/iptables/
 ```
-python port_knocking_utility.py -h
+
+Next, put the server files where knockd is authorized to use it (such as `/var/app/`) and launch `setup.py`.
+
+Finally, you want to launch the server as a daemon (somehow) by opening the root crontab
+
+```bash
+sudo crontab -e
+```
+
+the line
+
+```bash
+@reboot sudo python3 /var/app/run_server.py
+```
+
+Reboot, test, and you're good to go !
+
+**Client**
+
+*Should work on both Windows and Linux - Only tested on Windows 10*
+
+The only thing you need to do is to install the requirements listed in the file `Client/requirements.txt`.
+
+To do so, launch the command
+
+```bash
+pip install -r requirements.txt
 ```
 
 ## Contributing
 If you want to contribute, please fork this repo and/or send pull requests. Thank you.<br />
 
 ## Supporting
-If you want to support me, you can send some kind messages via my website (https://phaide.net/contact)<br />
+If you want to support me, you can send some kind messages via [my website](https://phaide.net/contact)<br />
 
 And perhaps, consider making a donation<br />
 
