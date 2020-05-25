@@ -21,7 +21,7 @@ if not sys.platform.startswith("linux"):
     exit()
 
 
-def knockd_conf(open_sequence_file, close_sequence_file, network_interface, ssh_port):
+def knockd_conf(open_sequence_file, network_interface, ssh_port):
     current_directory = os.path.dirname(os.path.realpath(__file__))
     return """
 [options]
@@ -31,20 +31,12 @@ def knockd_conf(open_sequence_file, close_sequence_file, network_interface, ssh_
 [opencloseSSH]
     one_time_sequences      = {open_sequence_file}
     seq_timeout             = 5
-    start_command           = /sbin/iptables -A INPUT -s %IP% -p tcp --dport {ssh_port} -j ACCEPT
+    start_command           = /sbin/iptables -I INPUT -s %IP% -p tcp --dport {ssh_port} -j ACCEPT
     tcpflags                = syn
     cmd_timeout             = 5
     stop_command            = /sbin/iptables -D INPUT -s %IP% -p tcp --dport {ssh_port} -j ACCEPT
-
-#[closeSSH]
-#    one_time_sequences      = {close_sequence_file}
-#    seq_timeout             = 5
-#    command                 = /sbin/iptables -D INPUT -s %IP% -p tcp --dport {ssh_port} -j ACCEPT
-#    tcpflags                = syn
-
 """.format(
         open_sequence_file=open_sequence_file,
-        close_sequence_file=close_sequence_file,
         network_interface=network_interface,
         ssh_port=ssh_port,
         current_directory=current_directory,
@@ -71,14 +63,12 @@ def main():
     )
     configure_knockd(
         knockd_conf(
-            SetupConfig.close_sequence_file,
             SetupConfig.open_sequence_file,
             SetupConfig.network_interface,
             SetupConfig.ssh_port
         )
     )
     start_service("knockd")
-    # subprocess.call("sudo knockd -d", shell=True)
 
 
 if __name__ == "__main__":
