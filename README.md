@@ -17,6 +17,8 @@ It's rather an experimental feature to build upon.<br />
 
 ## Future work
 The main thing to rework is the Paramiko shell on the PKU client : when it asks for a password, the user has no choice but to type it in cleartext.
+One important feature not yet implemented is the sequence regeneration when a user connects. 
+Right now it doesn't, it only changes when the Telegram bot receives `/generate` (see workflow).
 
 ## Usage
 
