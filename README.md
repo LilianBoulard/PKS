@@ -15,6 +15,9 @@ This script, written in Python 3, is an attempt to solve this issue by dynamical
 However, it is not flawless ; therefore it is not advised in its current state to use it in a production environment. 
 It's rather an experimental feature to build upon.<br />
 
+## Future work
+The main thing to rework is the Paramiko shell on the PKU client : when it asks for a password, the user has no choice but to type it in cleartext.
+
 ## Usage
 
 ### Requirements
@@ -55,13 +58,30 @@ Reboot, test, and you're good to go !
 
 *Should work on both Windows and Linux - Only tested on Windows 10*
 
-The only thing you need to do is to install the requirements listed in the file `Client/requirements.txt`.
+First, modify the file `Client/pkuclient/config.py` to fit your needs.
+
+Then, the only thing you need to do is to install the requirements listed in the file `Client/requirements.txt`.
 
 To do so, launch the command
 
 ```bash
 pip install -r requirements.txt
 ```
+
+And you're good to go ! Next, read the below workflow !
+
+**Workflow**
+
+The workflow for the client is :
+- Setup the PKU client.
+- Connect to Telegram with your account, and send "/help" to the bot configured in the server part.
+- The list of available commands will appear.
+- Send "/generate" to the bot, it will answer a series of ports.
+- Launch the PKU client, enter the password, the three ports (one by one), press enter, and a SSH shell should open.
+- If it doesn't, ask the person in charge of the server to check it is running and the configuration is correct.
+
+***Warning: the shell is emulated by Paramiko. 
+The main downside to this approach is that when asked a password, you will have no choice but to type it in cleartext.***
 
 ## Contributing
 If you want to contribute, please fork this repo and/or send pull requests. Thank you.<br />
