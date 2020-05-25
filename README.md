@@ -1,5 +1,5 @@
-# Port-knocking
-A port-knocking utility. 
+# PKU
+A Port-Knocking Utility. 
 
 ## Issue
 Opening a server publicly to the Internet implies major risks.<br />
