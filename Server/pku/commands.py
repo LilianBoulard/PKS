@@ -1,7 +1,6 @@
 # -*- coding: UTF8 -*-
 
 import inspect
-import time
 
 from .core import *
 from .utils import *
@@ -27,6 +26,7 @@ class Commands:
         self.actions = {
             "/generate": [Commands.generate, []],
             "/stop": [Commands.stop, []],
+            "/start": [Commands.start, []],
             "/help": [Commands.help, [["__init__", "invalid"]]],
         }
 

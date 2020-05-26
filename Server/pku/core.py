@@ -61,17 +61,6 @@ def generate_new_sequence(num: int = Config.sequences_length, seed: int = None) 
     return port_list
 
 
-def write_sequence(fl, sequence: list) -> None:
-    """
-    Writes a port list with format "123, 456, 789" to the file "fl".
-
-    :param fl: File object.
-    :param list sequence: The ports to write
-    :return None:
-    """
-    fl.write(", ".join([str(seq) for seq in sequence]))
-
-
 def set_open_sequence(port_sequence: list) -> None:
     """
     Writes the port list to the file specified by the config attribute "open_sequence_file".
@@ -79,7 +68,11 @@ def set_open_sequence(port_sequence: list) -> None:
     :param list port_sequence: A list containing the ports to write.
     :return None:
     """
-    with open(Config.open_sequence_file, "w") as osf:
-        write_sequence(osf, port_sequence)
+    configure_knockd(knockd_conf(port_sequence))
 
     restart_service("knockd")
+
+
+def configure_knockd(conf: str) -> None:
+    with open(SetupConfig.knockd_config_file, "w") as conf_file:
+        conf_file.write(conf)
