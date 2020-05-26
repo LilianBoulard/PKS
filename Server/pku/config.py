@@ -37,8 +37,6 @@ class Config:
     use_open_sequence: bool = False
     # The ports to use for the open sequence if the above parameter is set to True
     open_sequence: list = [100, 200, 300]
-    # File where to store the port sequence used for the open process. Must be an absolute path.
-    open_sequence_file: str = "/var/app/open_sequence"
 
     # How many ports the knocking service uses. In most cases 3.
     sequences_length: int = 3
@@ -62,6 +60,3 @@ class SetupConfig:
 
     # See Config.ssh_port
     ssh_port: int = Config.ssh_port
-
-    # See Config.open_sequence_file
-    open_sequence_file: str = Config.open_sequence_file
