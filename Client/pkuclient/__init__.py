@@ -21,7 +21,7 @@ def send_tcp_packet(server: str, port: int) -> None:
     """
     src_port = port
     dst_port = port
-    src = "192.168.0.48"
+    src = Config.own_address
     dst = server
     ip = IP(src=src, dst=dst)
     syn = TCP(sport=src_port, dport=dst_port, flags='S', seq=1000)
