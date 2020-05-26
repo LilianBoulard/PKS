@@ -14,6 +14,9 @@ class Config:
     # Remote server to connect to. Can be an IP address or a DNS name.
     server: str = "192.168.0.100"
 
+    # This computer's IP address.
+    own_address: str = "192.168.0.48"
+
     # SSH Port to connect to.
     ssh_port: int = 22
 
