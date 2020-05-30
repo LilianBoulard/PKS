@@ -33,28 +33,30 @@ It's easy and free !
 
 Next, modify the file `Server/pku/config.py` to fit your needs.
 
-Next, follow [this link](https://www.digitalocean.com/community/tutorials/how-to-use-port-knocking-to-hide-your-ssh-daemon-from-attackers-on-ubuntu) (also available in the docstring of the file `Server/setup.py`) and configure your server by following along the first part (IPTables ; be careful when modifying your iptables).
-> Update of the article : when installing `iptables-persistent`, the service is automatically launched, but you need to configure the saved rules with the command
+Next, follow [this link](https://www.digitalocean.com/community/tutorials/how-to-use-port-knocking-to-hide-your-ssh-daemon-from-attackers-on-ubuntu) (also available in the docstring of the file `Server/setup.py`) and configure your server by following along the first part (IPTables). Note: be careful when modifying your iptables, espacially if you're connected via SSH or such.
+> Article update : when installing `iptables-persistent`, the service is automatically launched, but you need to configure the saved rules with the command
 
 ```bash
 cd ~ && touch rules.v4 && sudo iptables-save >> rules.v4 && sudo mv rules.v4 /etc/iptables/
 ```
 
-Next, put the server files where knockd is authorized to use it (such as `/var/app/`) and launch `setup.py`.
+Next, put the server files in a directory knockd is authorized to use (such as `/var/app/`) and launch `setup.py`.
 
-Finally, you want to launch the server as a daemon (somehow) by opening the root crontab
+Finally, you want to launch the server as a daemon, by opening the root crontab
 
 ```bash
 sudo crontab -e
 ```
 
-the line
+and adding the line
 
 ```bash
-@reboot sudo python3 /var/app/run_server.py
+@reboot sudo screen -AmdS pku python3 /var/app/run_server.py
 ```
 
 Reboot, test, and you're good to go !
+
+To manage the PKU server instance, use the command [`screen`](https://help.ubuntu.com/community/Screen).
 
 **Client**
 
@@ -62,7 +64,7 @@ Reboot, test, and you're good to go !
 
 First, modify the file `Client/pkuclient/config.py` to fit your needs.
 
-Then, the only thing you need to do is to install the requirements listed in the file `Client/requirements.txt`.
+Next, you need to install the python requirements listed in `Client/requirements.txt`.
 
 To do so, launch the command
 
@@ -70,20 +72,21 @@ To do so, launch the command
 pip install -r requirements.txt
 ```
 
-And you're good to go ! Next, read the below workflow !
+And you're good to go !
 
 **Workflow**
 
 The workflow for the client is :
 - Setup the PKU client.
-- Connect to Telegram with your account, and send `/help` to the bot configured in the server part.
+- Connect to Telegram, and send `/help` to the bot configured in the server part.
 - The list of available commands will appear.
 - Send `/generate` to the bot, it will answer a series of ports.
-- Launch the PKU client, enter the password, the three ports (one by one), press enter, and a SSH shell should open.
-- If it doesn't, ask the person in charge of the server to check it is running and the configuration is correct.
+- Launch the PKU client, enter the password of the remote account, the three ports (one by one), press enter, and a SSH shell should open.
+- If it doesn't, check your configuration and/or ask the person in charge of the server to check it is running and the configuration is correct.
 
 ***Warning: the shell is emulated by Paramiko. 
-The main downside to this approach is that when asked a password, you will have no choice but to type it in cleartext.***
+The main downside to this approach is that when asked a password, you will have no choice but to type it in cleartext.
+Also, I noticed some commands return bad encoded characters.***
 
 ## Contributing
 If you want to contribute, please fork this repo and/or send pull requests. Thank you.<br />
