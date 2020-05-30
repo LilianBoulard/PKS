@@ -22,9 +22,7 @@ Right now it doesn't, it only changes when the Telegram bot receives `/generate`
 
 ## Usage
 
-### Requirements
-
-**Server**
+### Server
 
 *ONLY GNU/LINUX - Only tested on Debian/Ubuntu*
 
@@ -58,7 +56,7 @@ Reboot, test, and you're good to go !
 
 To manage the PKU server instance, use the command [`screen`](https://help.ubuntu.com/community/Screen).
 
-**Client**
+### Client
 
 *Should work on both Windows and Linux - Only tested on Windows 10*
 
