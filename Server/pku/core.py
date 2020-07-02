@@ -1,78 +1,116 @@
 # -*- coding: UTF8 -*-
 
+import logging
 from hashlib import sha256
 from random import randint
 
 from .config import Config
-from .utils import *
+from .utils import Utils
 
 
-def generate_new_sequence(num: int = Config.sequences_length, seed: int = None) -> list:
-    """
-    Generates a new sequence of ports.
+class Core:
 
-    :param int num: How many ports to generate.
-    :param int seed: A seed. Two instances of the function using the same seed will return the same ports.
-    :return list[int]: A list of ports.
+    @staticmethod
+    def generate_new_sequence(num: int = Config.sequences_length, seed: int = None) -> list:
+        """
+        Generates a new sequence of ports.
 
-    :example:
+        :param int num: How many ports to generate.
+        :param int seed: A seed. Two instances of the function using the same seed will return the same ports.
+        :return list[int]: A list of ports.
 
-    >>> generate_new_sequence()
-    [6158, 16499, 8715]
+        :example:
 
-    >>> generate_new_sequence()  # Returns a different list of ports each time it is called.
-    [40596, 13335, 5189]
+        >>> Core.generate_new_sequence()
+        [6158, 16499, 8715]
 
-    >>> generate_new_sequence(num=3, seed=123456789)
-    [58045, 13282, 10510]
+        >>> Core.generate_new_sequence()  # Returns a different list of ports each time it is called.
+        [40596, 13335, 5189]
 
-    >>> generate_new_sequence(num=4, seed=123456789)  # Another call, with the same seed
-    [58045, 13282, 10510, 3987]
+        >>> Core.generate_new_sequence(num=3, seed=123456789)
+        [58045, 13282, 10510]
 
-    """
+        >>> Core.generate_new_sequence(num=4, seed=123456789)  # Another call, with the same seed but different length
+        [58045, 13282, 10510, 3987]
 
-    first_acceptable_port: int = Config.acceptable_port_range[0]
-    last_acceptable_port: int = Config.acceptable_port_range[-1:][0]
+        """
 
-    if seed:
-        port_list = [
-            int(
-                sha256(
-                    str(i + seed).encode("utf-8")
-                ).hexdigest(),
-                16
-            ) for i, _ in enumerate(range(num))
-        ]
-    else:
-        port_list = [
-            randint(
-                first_acceptable_port,
-                last_acceptable_port
-            ) for _ in range(num)
-        ]
+        logging.debug("Creating a new sequence with args num: int = %s, seed: int = %s.", Config.sequences_length, seed)
 
-    for i, port in enumerate(port_list):
-        while port in Config.ports_blacklist or port not in Config.acceptable_port_range:
-            port += 1
-            if port > last_acceptable_port:
-                port = (port % last_acceptable_port) + first_acceptable_port
-            port_list[i] = port
+        first_acceptable_port: int = Config.acceptable_port_range[0]
+        last_acceptable_port: int = Config.acceptable_port_range[-1:][0]
 
-    return port_list
+        logging.debug("First acceptable port: %d ; last acceptable port: %d",
+                      first_acceptable_port, last_acceptable_port)
 
+        if seed:
+            port_list = [
+                int(
+                    # Hashes the index and the seed.
+                    sha256(
+                        str(i + seed).encode("utf-8")
+                    ).hexdigest(),
+                    16  # Converts the hexadecimal digest to decimal.
+                ) for i, _ in enumerate(range(num))
+            ]
+        else:
+            port_list = [
+                randint(
+                    # Applies the range to the randint function
+                    first_acceptable_port,
+                    last_acceptable_port
+                ) for _ in range(num)
+            ]
 
-def set_open_sequence(port_sequence: list) -> None:
-    """
-    Writes the port list to the file specified by the config attribute "open_sequence_file".
+        port_list = Utils.filter_port_list(port_list)
 
-    :param list port_sequence: A list containing the ports to write.
-    :return None:
-    """
-    configure_knockd(knockd_conf(port_sequence))
+        return port_list
 
-    restart_service("knockd")
+    @staticmethod
+    def set_open_sequence(port_sequence: list) -> None:
+        """
+        Writes a new list of ports to the knockd configuration file.
 
+        :param list port_sequence: A list containing the ports to write.
+        :return None:
+        """
+        Core.configure_knockd(port_sequence)
+        Utils.restart_service("knockd")
 
-def configure_knockd(conf: str) -> None:
-    with open(SetupConfig.knockd_config_file, "w") as conf_file:
-        conf_file.write(conf)
+    @staticmethod
+    def configure_knockd(seq: list) -> None:
+        """
+        Rewrites the knockd configuration file.
+
+        :param list seq: The new sequence to write in the conf.
+        :return None:
+        """
+
+        def knockd_conf(new_sequence: list) -> str:
+            """
+            Constructs a new configuration for knockd.
+
+            :param new_sequence: The new sequence to apply to knockd.
+            :return str: The new configuration for knockd.
+            """
+            return """
+[options]
+    logfile     = /var/log/knockd.log
+    interface   = {network_interface}
+
+[opencloseSSH]
+    sequence                = {open_sequence}
+    seq_timeout             = 5
+    start_command           = /sbin/iptables -I INPUT -s %IP% -p tcp --dport {ssh_port} -j ACCEPT
+    tcpflags                = syn
+    cmd_timeout             = 5
+    stop_command            = /sbin/iptables -D INPUT -s %IP% -p tcp --dport {ssh_port} -j ACCEPT
+        """.format(
+                open_sequence=", ".join([str(p) for p in new_sequence]),
+                network_interface=Config.network_interface,
+                ssh_port=Config.ssh_port,
+            )
+        # End of function knockd_conf()
+
+        with open(Config.knockd_config_file, "w") as conf_file:
+            conf_file.write(knockd_conf(seq))

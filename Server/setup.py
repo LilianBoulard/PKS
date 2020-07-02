@@ -8,13 +8,12 @@ https://www.digitalocean.com/community/tutorials/how-to-use-port-knocking-to-hid
 
 """
 
-import os
 import sys
 import subprocess
 
-from pku.config import SetupConfig
-from pku.utils import *
-from pku.core import *
+from pku.config import Config
+from pku.utils import Utils
+from pku.core import Core
 
 
 if not sys.platform.startswith("linux"):
@@ -22,21 +21,13 @@ if not sys.platform.startswith("linux"):
     exit()
 
 
-def install_package(packet_manager, service: str):
-    code = int(subprocess.call("sudo {} install {}".format(packet_manager, service), shell=True))
-    if code == 0:
-        return True
-    else:
-        return False
-
-
 def main():
-    install_package(
-        SetupConfig.packet_manager,
+    Utils.install_package(
+        Config.packet_manager,
         "knockd"
     )
-    configure_knockd(knockd_conf([100, 200, 300]))
-    start_service("knockd")
+    Core.configure_knockd([100, 200, 300])
+    Utils.start_service("knockd")
 
 
 if __name__ == "__main__":

@@ -1,61 +1,90 @@
 # -*- coding: UTF8 -*-
 
 import subprocess
-import datetime
+import logging
 
-from .config import SetupConfig
-
-
-def log(message) -> None:
-    """
-    :param message: Data to log. Can be any object that supports __str__().
-    :return None:
-    """
-    print(datetime.datetime.now(), message)
+from .config import Config
 
 
-def start_service(service: str) -> bool:
-    code = int(subprocess.call("sudo systemctl start " + service, shell=True))
-    if code == 0:
-        return True
-    else:
-        return False
+class Utils:
 
+    @staticmethod
+    def start_service(service: str) -> bool:
+        """
+        Starts a service.
 
-def stop_service(service: str) -> bool:
-    code = int(subprocess.call("sudo systemctl stop " + service, shell=True))
-    if code == 0:
-        return True
-    else:
-        return False
+        :param str service:
+        :return bool: True if the operation succeeded, False otherwise.
+        """
+        code = int(subprocess.call("sudo systemctl start " + service, shell=True))
+        if code == 0:
+            logging.info("Started service %s successfully (code %s).", service, code)
+            return True
+        else:
+            logging.error("Tried to start service %s but returned code %s.", service, code)
+            return False
 
+    @staticmethod
+    def stop_service(service: str) -> bool:
+        """
+        Stops a service.
 
-def restart_service(service: str) -> bool:
-    if stop_service(service) and start_service(service):
-        return True
-    else:
-        return False
+        :param str service:
+        :return bool: True if the operation succeeded, False otherwise.
+        """
+        code = int(subprocess.call("sudo systemctl stop " + service, shell=True))
+        if code == 0:
+            logging.info("Stopped service %s successfully (code %s).", service, code)
+            return True
+        else:
+            logging.error("Tried to stop service %s but returned code %s.", service, code)
+            return False
 
+    @staticmethod
+    def restart_service(service: str) -> bool:
+        """
+        Restarts an os service.
 
-def knockd_conf(new_sequence: list) -> str:
-    """
-    :param new_sequence: A list containing the new sequence to apply to knockd.
-    :return str: The new configuration for knockd, string format.
-    """
-    return """
-[options]
-    logfile     = /var/log/knockd.log
-    interface   = {network_interface}
+        :param str service:
+        :return bool: True if the operation succeeded, False otherwise.
 
-[opencloseSSH]
-    sequence                = {open_sequence}
-    seq_timeout             = 5
-    start_command           = /sbin/iptables -I INPUT -s %IP% -p tcp --dport {ssh_port} -j ACCEPT
-    tcpflags                = syn
-    cmd_timeout             = 5
-    stop_command            = /sbin/iptables -D INPUT -s %IP% -p tcp --dport {ssh_port} -j ACCEPT
-""".format(
-        open_sequence=", ".join([str(p) for p in new_sequence]),
-        network_interface=SetupConfig.network_interface,
-        ssh_port=SetupConfig.ssh_port,
-    )
+        .. seealso: Utils.start_service(), Utils.stop_service()
+        """
+        if Utils.stop_service(service) and Utils.start_service(service):
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def install_package(packet_manager: str, package: str) -> bool:
+        """
+        Tries to install a system package.
+
+        :param str packet_manager:
+        :param str package:
+        :return bool: True if the operation succeeded, False otherwise.
+        """
+        code = int(subprocess.call("sudo {} install {} -y".format(packet_manager, package), shell=True))
+        if code == 0:
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def filter_port_list(port_list: list) -> list:
+        """
+        Takes a list of ports and filters them so that they suit the Config.
+
+        :param list port_list: A list of integers
+        :return list: A list with each port filtered depending of the configuration.
+        """
+        first_acceptable_port: int = Config.acceptable_port_range[0]
+        last_acceptable_port: int = Config.acceptable_port_range[-1:][0]
+
+        for i, port in enumerate(port_list):
+            while port in Config.ports_blacklist or port not in Config.acceptable_port_range:
+                port += 1
+                if port > last_acceptable_port:
+                    port = (port % last_acceptable_port) + first_acceptable_port
+                port_list[i] = port
+        return port_list

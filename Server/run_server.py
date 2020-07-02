@@ -10,4 +10,9 @@ if not sys.platform.startswith("linux"):
     exit()
 
 bot = pku.BotHandler()
-pku.main(bot)
+
+try:
+    pku.main(bot)
+except SystemExit:
+    del bot
+    exit(0)
