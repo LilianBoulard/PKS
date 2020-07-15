@@ -98,7 +98,7 @@ def main(bot: BotHandler, offset: int = 0) -> None:
 
         choice = chat_msg[0]
         func = commands_l.get(choice, [commands_o.invalid])[0]  # Get function
-        num_exp_args = commands_l.get(choice, [None, []])[1]  # Get how many arguments should be provided by the user.
+        num_exp_args = commands_l.get(choice, [None, 0])[1]  # Get how many arguments should be provided by the user.
         args = commands_l.get(choice, [None, [], []])[2]  # Get additional arguments
 
         chat_msg.pop(0)  # Removes the command
