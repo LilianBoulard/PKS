@@ -30,7 +30,10 @@ class BotHandler:
         method = 'getUpdates'
         params = {'timeout': timeout, 'offset': offset}
         resp = requests.get(self.api_url + method, params)
-        result_json = resp.json()['result']
+        try:
+            result_json = resp.json()['result']
+        except KeyError:
+            raise Exception("The Telegram token is invalid. Please check config.py.")
         return result_json
 
     def send_message(self, chat_id, text):
