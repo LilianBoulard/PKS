@@ -11,14 +11,13 @@ https://www.sans.org/reading-room/whitepapers/sysadmin/port-knocking-basics-1634
 It covers the main problem with port-knocking systems : static port-knocking.<br />
 
 ## Solution
-This script, written in Python 3, is an attempt to solve this issue by dynamically defining new ports sequences.<br />
+This system, written in Python 3, is an attempt to solve this issue by dynamically defining new ports sequences.<br />
 However, it is not flawless ; therefore it is not advised in its current state to use it in a production environment. 
 It's rather an experimental feature to build upon.<br />
 
 ## Future work
-The main thing to rework is the Paramiko shell on the PKU client : when it asks for a password, the user has no choice but to type it in cleartext.
-One important feature not yet implemented is the sequence regeneration when a user connects. 
-Right now it doesn't, it only changes when the Telegram bot receives `/generate` (see workflow).
+All future work is documented in the "project" section of this repo.
+Also, please check "Issues".
 
 ## Usage
 
@@ -38,7 +37,7 @@ Next, follow [this link](https://www.digitalocean.com/community/tutorials/how-to
 cd ~ && touch rules.v4 && sudo iptables-save >> rules.v4 && sudo mv rules.v4 /etc/iptables/
 ```
 
-Next, put the server files in a directory knockd is authorized to use (such as `/var/app/`) and launch `setup.py`.
+Next, update your packages with "sudo apt-get update" (modify to fit your distro) and put the server files in a public directory (such as `/var/app/`) and launch `setup.py`.
 
 Finally, you want to launch the server as a daemon, by opening the root crontab
 
