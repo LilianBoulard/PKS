@@ -47,7 +47,7 @@ def main():
         except paramiko.ssh_exception.AuthenticationException:
             password = getpass("The password is incorrect. Please try again:\n> ")
         except Exception as exc:
-            print(exc)
+            input(exc)
             return
         else:
             break
@@ -57,7 +57,7 @@ def main():
     try:
         interactive.interactive_shell(chan)
     except OSError:
-        # The interactive shell script raises OSErrors on some occasions. Usually when sending "exit" to bash.
+        # The interactive shell script raises OSErrors on some occasions. Usually when sending "exit"
         pass
 
     chan.close()
