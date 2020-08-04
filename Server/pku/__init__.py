@@ -96,10 +96,11 @@ def main(bot: BotHandler, offset: int = 0) -> None:
 
         chat_msg = chat_text.split(" ")
 
-        choice = chat_msg[0]
-        func = commands_l.get(choice, [commands_o.invalid])[0]  # Get function
-        num_exp_args = commands_l.get(choice, [None, 0])[1]  # Get how many arguments should be provided by the user.
-        args = commands_l.get(choice, [None, [], []])[2]  # Get additional arguments
+        # Get the command
+        command = chat_msg[0].split("@")[0]
+        func = commands_l.get(command, [commands_o.invalid])[0]  # Get function
+        num_exp_args = commands_l.get(command, [None, 0])[1]  # Get how many arguments should be provided by the user.
+        args = commands_l.get(command, [None, None, []])[2]  # Get additional arguments
 
         chat_msg.pop(0)  # Removes the command
         original_args_length = len(args)
