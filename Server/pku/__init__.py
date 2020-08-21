@@ -19,6 +19,7 @@ from .config import Config
 # Setup the configuration for logging.
 logging.basicConfig(
     format='%(asctime)s - %(message)s',  # We add a timestamp to each log entries.
+    level=logging.INFO,
     datefmt='%m/%d/%Y %I:%M:%S %p',
     filename="/var/log/pku.log",
     filemode="r+",
