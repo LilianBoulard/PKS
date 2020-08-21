@@ -1,12 +1,12 @@
 # -*- coding: UTF8 -*-
 
-import pku
+import pks
 
-if not pku.Config.use_open_sequence:
-    bot = pku.BotHandler()  # Create a new bot instance
+if not pks.Config.use_open_sequence:
+    bot = pks.BotHandler()  # Create a new bot instance
 
-    chan = pku.Channels(bot)
-    cmd = pku.Commands(chan)
+    chan = pks.Channels(bot)
+    cmd = pks.Commands(chan)
 
     message = "New SSH connection registered.\n"
     message += cmd.generate()

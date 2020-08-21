@@ -11,9 +11,9 @@ https://www.digitalocean.com/community/tutorials/how-to-use-port-knocking-to-hid
 import sys
 import subprocess
 
-from pku.config import Config
-from pku.utils import Utils
-from pku.core import Core
+from pks.config import Config
+from pks.utils import Utils
+from pks.core import Core
 
 
 if not sys.platform.startswith("linux"):

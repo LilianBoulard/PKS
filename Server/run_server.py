@@ -2,17 +2,17 @@
 
 import sys
 
-import pku
+import pks
 
 
 if not sys.platform.startswith("linux"):
     input("This server can only run on Linux distributions. Press enter to quit...")
     exit()
 
-bot = pku.BotHandler()
+bot = pks.TelegramBot()
 
 try:
-    pku.main(bot)
+    pks.main(bot)
 except SystemExit:
     del bot
     exit(0)
