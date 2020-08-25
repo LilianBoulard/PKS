@@ -1,17 +1,20 @@
-# PKU
-A Port-Knocking Utility. 
+# PKS
+A Port-Knocking System. 
 
 ## Issue
-Opening a server publicly to the Internet implies major risks.<br />
-Along with different ways of securing its access, such as RSA keys for SSH connections, I learned about a server-side system allowing outside connections "on-demand" using a knocking system, that will open a port once a specific sequence of packets is received.<br />
+Opening a server publicly to the Internet implies major risks.
+\
+Along with different ways of securing its access, such as RSA keys for SSH connections, I learned about a system allowing outside connections "on-demand" using a knocking system, that will open a port once a specific sequence of packets is received.
 
-A bunch of articles have already been written on the subject, such as this paper, which is pretty interesting and accurate :<br />
-https://www.sans.org/reading-room/whitepapers/sysadmin/port-knocking-basics-1634<br />
-
-It covers the main problem with port-knocking systems : static port-knocking.<br />
+As Wikipedia states it, "Port knocking is a method of externally opening ports on a firewall by generating a connection attempt on a set of prespecified closed ports. 
+\
+Once a correct sequence of connection attempts is received, the firewall rules are dynamically modified to allow the host which sent the connection attempts to connect over specific port(s)."
+These systems provide an additionnal layer of security to a system, but are known for having a critical flaw : static sequences.
+Packet sniffing can be used by an attacker to discover the port knock sequences, and therefore get unauthorized access to the server.
 
 ## Solution
-This system, written in Python 3, is an attempt to solve this issue by dynamically defining new ports sequences.<br />
+This system, written in Python 3, is an attempt to solve this issue by dynamically defining new ports sequences.
+\
 However, it is not flawless ; therefore it is not advised in its current state to use it in a production environment. 
 It's rather an experimental feature to build upon.<br />
 
@@ -26,18 +29,18 @@ Also, please check "Issues".
 *ONLY GNU/LINUX - Only tested on Debian/Ubuntu*
 
 To use the server, you will first need to [get a Telegram bot](https://core.telegram.org/bots#3-how-do-i-create-a-bot).
-It's easy and free !
+It's free and very easy !
 
-Next, modify the file `Server/pku/config.py` to fit your needs.
+Next, modify the file `Server/pks/config.py` to fit your needs.
 
-Next, follow [this link](https://www.digitalocean.com/community/tutorials/how-to-use-port-knocking-to-hide-your-ssh-daemon-from-attackers-on-ubuntu) (also available in the docstring of the file `Server/setup.py`) and configure your server by following along the first part (IPTables). Note: be careful when modifying your iptables, espacially if you're connected via SSH or such.
+Next, follow [this link](https://www.digitalocean.com/community/tutorials/how-to-use-port-knocking-to-hide-your-ssh-daemon-from-attackers-on-ubuntu) (also available in the docstring of the file `Server/setup.py`) and configure your server by following along the first part (IPTables). Note: be careful when modifying your iptables, espacially if you're connected via SSH.
 > Article update : when installing `iptables-persistent`, the service is automatically launched, but you need to configure the saved rules with the command
 
 ```bash
 cd ~ && touch rules.v4 && sudo iptables-save >> rules.v4 && sudo mv rules.v4 /etc/iptables/
 ```
 
-Next, update your packages with "sudo apt-get update" (modify to fit your distro) and put the server files in a public directory (such as `/var/app/`) and launch `setup.py`.
+Next, update your packages with "sudo apt-get update" (modify to fit your distro) and put the server files in a public directory (such as `/var/app/`) and launch `sudo python3 setup.py`.
 
 Finally, you want to launch the server as a daemon, by opening the root crontab
 
@@ -59,7 +62,7 @@ To manage the PKU server instance, use the command [`screen`](https://help.ubunt
 
 *Should work on both Windows and Linux - Only tested on Windows 10*
 
-First, modify the file `Client/pkuclient/config.py` to fit your needs.
+First, modify the file `Client/pksclient/config.py` to fit your needs.
 
 Next, you need to install the python requirements listed in `Client/requirements.txt`.
 
@@ -74,16 +77,11 @@ And you're good to go !
 **Workflow**
 
 The workflow for the client is :
-- Setup the PKU client.
+- Configure the PKS client.
 - Connect to Telegram, and send `/help` to the bot configured in the server part.
 - The list of available commands will appear.
 - Send `/generate` to the bot, it will answer a series of ports.
-- Launch the PKU client, enter the password of the remote account, the three ports (one by one), press enter, and a SSH shell should open.
-- If it doesn't, check your configuration and/or ask the person in charge of the server to check it is running and the configuration is correct.
-
-***Warning: the shell is emulated by Paramiko. 
-The main downside to this approach is that when asked a password, you will have no choice but to type it in cleartext.
-Also, I noticed some commands return bad encoded characters.***
+- Prepare your SSH shell (or such), then launch the PKS client, enter the three ports (one by one), and press enter. You will then have about 30 seconds to initiate connection. The port will close itself after this delay.
 
 ## Contributing
 If you want to contribute, please fork this repo and/or send pull requests. Thank you.<br />
