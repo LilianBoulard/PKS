@@ -8,12 +8,22 @@ from .config import Config
 
 class Utils:
 
+    """
+
+    This class is a collection of utility functions, that assist the core and the commands class in their tasks.
+
+    Classes Utils and Core are pretty much the same though.
+
+    All functions in this class should be static.
+
+    """
+
     @staticmethod
     def start_service(service: str) -> bool:
         """
         Starts a service.
 
-        :param str service:
+        :param str service: A system service name.
         :return bool: True if the operation succeeded, False otherwise.
         """
         code = int(subprocess.call("sudo systemctl start " + service, shell=True))
@@ -29,7 +39,7 @@ class Utils:
         """
         Stops a service.
 
-        :param str service:
+        :param str service: A system service name.
         :return bool: True if the operation succeeded, False otherwise.
         """
         code = int(subprocess.call("sudo systemctl stop " + service, shell=True))
@@ -45,7 +55,7 @@ class Utils:
         """
         Restarts an os service.
 
-        :param str service:
+        :param str service: A system service name.
         :return bool: True if the operation succeeded, False otherwise.
 
         .. seealso: Utils.start_service(), Utils.stop_service()
@@ -54,6 +64,10 @@ class Utils:
             return True
         else:
             return False
+
+    @staticmethod
+    def create_log_file(path: str = "/var/log/pks.log") -> None:
+        open(path, 'w').close()
 
     @staticmethod
     def install_package(packet_manager: str, package: str) -> bool:

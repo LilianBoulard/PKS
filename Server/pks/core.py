@@ -1,6 +1,7 @@
 # -*- coding: UTF8 -*-
 
 import logging
+
 from hashlib import sha256
 from random import randint
 
@@ -10,13 +11,25 @@ from .utils import Utils
 
 class Core:
 
+    """
+
+    This class contains the most relevant functions in the project, what makes the "core" of the project (haha get it ?)
+
+    Functions which are not core-related should be placed in the Utils class.
+
+    Classes Utils and Core are pretty much the same though.
+
+    All functions in this class should be static.
+
+    """
+
     @staticmethod
-    def generate_new_sequence(num: int = Config.sequences_length, seed: int = None) -> list:
+    def generate_new_sequence(num: int = Config.sequences_length, seed: int or None = None) -> list:
         """
         Generates a new sequence of ports.
 
         :param int num: How many ports to generate.
-        :param int seed: A seed. Two instances of the function using the same seed will return the same ports.
+        :param int seed: A seed used by the generator. Calling the function with a same seed will return the same ports.
         :return list[int]: A list of ports.
 
         :example:
@@ -24,13 +37,13 @@ class Core:
         >>> Core.generate_new_sequence()
         [6158, 16499, 8715]
 
-        >>> Core.generate_new_sequence()  # Returns a different list of ports each time it is called.
+        >>> Core.generate_new_sequence()  # Returns a different list each time it is called.
         [40596, 13335, 5189]
 
         >>> Core.generate_new_sequence(num=3, seed=123456789)
         [58045, 13282, 10510]
 
-        >>> Core.generate_new_sequence(num=4, seed=123456789)  # Another call, with the same seed but different length
+        >>> Core.generate_new_sequence(num=4, seed=123456789)  # Another call ; same seed, different length
         [58045, 13282, 10510, 3987]
 
         """
@@ -72,7 +85,6 @@ class Core:
         Writes a new list of ports to the knockd configuration file.
 
         :param list port_sequence: A list containing the ports to write.
-        :return None:
         """
         Core.configure_knockd(port_sequence)
         Utils.restart_service("knockd")
@@ -83,7 +95,6 @@ class Core:
         Rewrites the knockd configuration file.
 
         :param list seq: The new sequence to write in the conf.
-        :return None:
         """
 
         def knockd_conf(new_sequence: list) -> str:
@@ -103,12 +114,12 @@ class Core:
     seq_timeout             = 5
     start_command           = /sbin/iptables -I INPUT -s %IP% -p tcp --dport {ssh_port} -j ACCEPT
     tcpflags                = syn
-    cmd_timeout             = 5
+    cmd_timeout             = 30
     stop_command            = /sbin/iptables -D INPUT -s %IP% -p tcp --dport {ssh_port} -j ACCEPT
         """.format(
                 open_sequence=", ".join([str(p) for p in new_sequence]),
                 network_interface=Config.network_interface,
-                ssh_port=Config.ssh_port,
+                ssh_port=Config.target_port,
             )
         # End of function knockd_conf()
 

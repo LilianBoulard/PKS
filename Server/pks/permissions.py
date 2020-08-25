@@ -33,29 +33,31 @@ class Permissions:
 
     def set_telegram_admins(self) -> None:
         """
-        Promote the system account (1) and the users defined in Config.telegram_user_admin_list as telegram admins.
-
-        :return None:
+        Promote the system account (1) and the users defined in
+        `pks.config.telegram_user_admin_list` as the Telegram bot's admins.
         """
         self.add_user_to_group("1", "admin")  # 1 is the system account (arbitrary)
         for admin in Config.telegram_user_admin_list:
-            self.add_user_to_group(str(admin), "admin")
+            self.add_user_to_group(
+                str(admin),  # We convert the value to string as Telegram IDs are integers.
+                "admin"
+            )
 
     def user_exists(self, user_id: str) -> bool:
         """
         Checks if the user exists in the database.
 
-        :param str user_id:
+        :param str user_id: A Telegram User ID.
         :return bool: True if he does, False otherwise.
         """
         return self.db.key_exists(self.db.db_columns[0], user_id)
 
-    def list_group_members(self, group: str) -> list:
+    def get_group_members(self, group: str) -> list:
         """
         Parses the database to find which users are part of a group, and return a list of these users.
 
-        :param str group:
-        :return list:
+        :param str group: A group name.
+        :return list: The group's users.
         """
         groups = []
         if group in self.get_valid_groups():
@@ -68,9 +70,9 @@ class Permissions:
 
     def get_valid_groups(self) -> list:
         """
-        Returns a list of the valid groups defined by the attribute permission_groups.
+        Returns a list of the valid groups defined by the attribute `permission_groups`.
 
-        :return list:
+        :return list: A list of valid groups.
         """
         return [v[0] for v in [list(g.keys()) for g in self.permission_groups]]
 
@@ -78,29 +80,28 @@ class Permissions:
         """
         Searches attribute "permission_groups" to check if the group specified is valid.
 
-        :param str group:
-        :return bool: True if the group is valid, False otherwise
+        :param str group: A group name.
+        :return bool: True if the group is valid, False otherwise.
 
         .. seealso: Permissions.get_valid_groups()
         """
         return group in self.get_valid_groups()
 
-    def create_user(self, user_id) -> None:
+    def create_user(self, user_id: str) -> None:
         """
         .. seealso: PermissionsDatabase.create_user()
 
-        :param str user_id:
-        :return None:
+        :param str user_id: A Telegram User ID.
         """
-        self.db.create_user(user_id)
+        if not self.user_exists(user_id):
+            self.db.create_user(user_id)
 
     def add_user_to_group(self, user_id: str, group: str) -> None:
         """
         Add a user to a group.
 
-        :param str user_id:
-        :param str group:
-        :return None:
+        :param str user_id: A Telegram User ID.
+        :param str group: A group name.
         """
         if not self.is_group_valid(group):
             return
@@ -114,9 +115,8 @@ class Permissions:
         """
         Remove user from a group.
 
-        :param str user_id:
-        :param str group:
-        :return None:
+        :param str user_id: A Telegram User ID.
+        :param str group: A group name.
         """
         if not self.is_group_valid(group):
             return
@@ -127,14 +127,14 @@ class Permissions:
         """
         Get a list of permissions granted by the user's groups membership.
 
-        :param str user_id:
+        :param str user_id: A Telegram User ID.
         :return list: A list of permissions granted by the groups the user is part of.
         """
         u_groups = self.db.list_groups(user_id)
 
         p_groups = ["none"]
         for permission_group in self.permission_groups:  # permission_group is a dict
-            # group is the name of the group.
+            # Get the name of the group.
             group = list(permission_group.keys())[0]
             if group in u_groups:
                 for pg in permission_group[group]:
@@ -146,9 +146,9 @@ class Permissions:
         """
         Will test if the user with precised id has sufficient permissions.
 
-        :param str user_id:
+        :param str user_id: A Telegram User ID.
         :param list needed_permissions: Must be a subset of attribute "permission_sets".
-        :return bool: True if he does, False otherwise
+        :return bool: True if he does, False otherwise.
         """
 
         # If the whitelist is not empty
@@ -189,7 +189,7 @@ class PermissionsDatabase(Database):
 
     def __init__(self):
         super().__init__(
-            "permissions.db",
+            "db/permissions.db",
             {
                 "permissions": dict
             }
@@ -200,8 +200,8 @@ class PermissionsDatabase(Database):
         Lists the groups "user_id" is part of.
         If the user does not exist in the database, returns an empty list.
 
-        :param str user_id:
-        :return list:
+        :param str user_id: A Telegram User ID.
+        :return list: A list of the groups this User ID is part of.
         """
         if self.key_exists(self.db_columns[0], user_id):
             val = self.query(self.db_columns[0], user_id)
@@ -214,8 +214,7 @@ class PermissionsDatabase(Database):
         Creates a new user in the database.
         Does not care if it already exists ; this verification must be made beforehand.
 
-        :param str user_id:
-        :return None:
+        :param str user_id: A Telegram User ID.
         """
         self.insert_dict(self.db_columns[0], {user_id: []})
 
@@ -225,11 +224,10 @@ class PermissionsDatabase(Database):
         This user must already exist in the database and the group must be verified to be valid beforehand.
         This function takes care of removing duplicates (in case the user was already part of the group).
 
-        :param str user_id:
-        :param str group:
-        :return None:
+        :param str user_id: A Telegram User ID.
+        :param str group: A group name.
         """
-        # Get a list of the groups he belongs to
+        # Get a list of the groups the user belongs to
         groups = self.list_groups(user_id)
         # Add the new group to this list
         groups.append(group)
@@ -243,11 +241,8 @@ class PermissionsDatabase(Database):
         Removes "user_id" from "group".
         This user must already exist in the database and the group must be verified to be valid beforehand.
 
-        :param str user_id:
-        :param str group:
-        :return None:
-
-        .. seealso: PermissionsDatabase.add_user_to_group()
+        :param str user_id: A Telegram User ID.
+        :param str group: A group name.
         """
         groups = self.list_groups(user_id)
         # Remove the new group to this list

@@ -15,31 +15,28 @@ class Channels:
         Adds a new chat id to the known channels database.
         If it already exists, set it to active, otherwise, create it.
 
-        :param str chat_id:
-        :return None:
+        :param str chat_id: A Telegram Chat ID.
         """
         if self.db.channel_exists(chat_id):
             self.db.set_active(chat_id)
         else:
             self.db.add(chat_id)
 
-    def remove(self, chat_id: str) -> None:
+    def disable(self, chat_id: str) -> None:
         """
-        Remove a chat id from the known channels database (only if it exists of course).
+        Disables a chat id from the known channels database (only if it exists of course).
 
-        :param str chat_id:
-        :return None:
+        :param str chat_id: A Telegram Chat ID.
         """
         if self.db.channel_exists(chat_id):
-            self.db.remove(chat_id)
+            self.db.disable(chat_id)
 
     def broadcast(self, message: str) -> None:
         """
         Broadcast a message.
         This means a message is sent to every active channel.
 
-        :param str message:
-        :return None:
+        :param str message: The message to broadcast.
         """
         logging.info(f"Broadcasting message: \"{message}\"")
         for chat_id in self.list_active_channels():
@@ -62,7 +59,8 @@ class Channels:
 class ChannelsDatabase(Database):
 
     """
-    Wrapper used to manipulate the channels database.
+    Wrapper used to manipulate the channels database, still roughly low-level.
+    Verifications and assertions are done in the `Channels` class.
 
     Database structure:
 
@@ -77,7 +75,7 @@ class ChannelsDatabase(Database):
 
     def __init__(self):
         super().__init__(
-            "channels.db",
+            "db/channels.db",
             {
                 "channels": dict
             }
@@ -94,8 +92,7 @@ class ChannelsDatabase(Database):
         """
         Set a channel as active.
 
-        :param str chat_id:
-        :return None:
+        :param str chat_id: A Telegram Chat ID.
         """
         # assert self.key_exists(self.db_columns[0], chat_id)
         self.update(self.db_columns[0], chat_id, True)
@@ -105,18 +102,16 @@ class ChannelsDatabase(Database):
         Adds a new chat id to the known channels database.
         Does not care if the chat already exists ; should be checked beforehand.
 
-        :param str chat_id:
-        :return None:
+        :param str chat_id: A Telegram Chat ID.
         """
         self.insert_dict(self.db_columns[0], {chat_id: True})
 
-    def remove(self, chat_id: str) -> None:
+    def disable(self, chat_id: str) -> None:
         """
-        Remove a chat id from the known channels database.
+        Disables a chat id from the known channels database (removes it from broadcast list).
         Does not care if the chat already exists ; should be checked beforehand.
 
-        :param str chat_id:
-        :return None:
+        :param str chat_id: A Telegram Chat ID.
         """
         # assert self.key_exists(self.db_columns[0], chat_id)
         self.update(self.db_columns[0], chat_id, False)

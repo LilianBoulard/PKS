@@ -2,6 +2,7 @@
 
 import inspect
 import logging
+
 from functools import wraps
 
 from .permissions import Permissions
@@ -37,7 +38,7 @@ class Commands:
         - For instance if you want to add a command "/call_me", you should add a function to this class named "call_me".
         - As such, Telegram commands should follow functions' naming conventions.
         - The commands of this class and the text commands (those send to the telegram bot) are linked via the
-          "commands_l" variable of the __init__.py's main() function.
+          "commands_l" variable of the __set_commands function of file __init__.
     - Functions must return either a string or nothing (None).
     - The decorator "@permissions_required()" must ALWAYS be present before your function.
         - If everyone should be allowed to launch this command, use "none" as the decorator's argument.
@@ -90,6 +91,10 @@ class Commands:
                     string += "/{}: {}\n".format(function_name, inspect.getdoc(getattr(Commands, function_name)))
             return string
 
+    @permissions_required("manage_sequences")
+    def target_port(self) -> str:
+        return str(Config.target_port)
+
     @permissions_required("modify_bot_behaviour", "admin_access")
     def add_perm(self, user: str, group: str) -> str:
         """
@@ -130,21 +135,58 @@ class Commands:
             message += "\nWARNING: the bot is stopped. Start it with /start."
         return message
 
+    @permissions_required("admin_access")
+    def status(self) -> str:
+        """
+        Prints the status of the bot, whether it is running or stopped.
+        """
+        return "Running" if self.running else "Stopped"
+
+    @permissions_required("admin_access")
+    def print_config(self, attr: str or None) -> str:
+        """
+        Print the config of the bot.
+        Usage: /print_config help
+        """
+        attributes = [d for d in dir(Config) if not d.startswith("__")]
+        config = "Value:\n"
+
+        if attr == "help":
+            return "Available attributes: all, " + ", ".join(attributes)
+
+        if attr not in attributes:  # If the attribute does not exist
+            return "This attribute does not exist. Use \"/print_config help\" or \"/help\" for more information."
+
+        if attr == "all":
+            for a in attributes:
+                config += getattr(Config, a)  # Get attribute value
+
+        config += getattr(Config, attr)
+
+        return str(config)
+
+    @permissions_required("admin_access")
+    def print_broadcast_list(self) -> str:
+        """
+        Prints a list of IDs corresponding to active channels.
+        """
+        return ", ".join(self.channels.list_active_channels())
+
     @permissions_required("modify_bot_behaviour")
-    def forget(self, chat_id) -> None:
+    def forget(self, chat_id: str) -> None:
         """
         Remove this channel from the broadcast list.
         """
-        self.channels.remove(chat_id)
+        self.channels.disable(chat_id)
 
     @permissions_required("modify_bot_behaviour")
-    def list_groups_members(self):
+    def list_groups_members(self) -> str:
         """
-        Lists all group memberships.
+        Lists all groups memberships.
         """
         message = ""
         for group in self.permissions.get_valid_groups():
-            message += group + ": " + ", ".join(self.permissions.list_group_members(group)) + "\n"
+            message += group + ": " + ", ".join(self.permissions.get_group_members(group)) + "\n"
         return message
 
     @permissions_required("modify_bot_behaviour")
@@ -176,7 +218,7 @@ class Commands:
     @permissions_required("modify_bot_behaviour", "admin_access")
     def shutdown(self):
         """
-        Completely stops knockd and the PKU Telegram interface & bot.
+        Completely stops knockd and the PKS Telegram interface & bot.
         """
         self.stop()
         raise SystemExit
