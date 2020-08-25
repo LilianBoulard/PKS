@@ -66,6 +66,10 @@ class Utils:
             return False
 
     @staticmethod
+    def create_log_file(path: str = "/var/log/pks.log") -> None:
+        open(path, 'w').close()
+
+    @staticmethod
     def install_package(packet_manager: str, package: str) -> bool:
         """
         Tries to install a system package.

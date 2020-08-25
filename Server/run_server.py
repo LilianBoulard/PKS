@@ -10,9 +10,11 @@ if not sys.platform.startswith("linux"):
     exit()
 
 bot = pks.TelegramBot()
+pk = pks.PKS(bot)
 
 try:
-    pks.main(bot)
+    pk.main()
 except SystemExit:
+    del pk
     del bot
     exit(0)

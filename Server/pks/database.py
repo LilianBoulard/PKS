@@ -62,10 +62,10 @@ class Database:
         :return shelve.DbfilenameShelf: A database object.
         """
         try:
-            db = shelve.open(db_name)
-        except FileNotFoundError:
             os.mkdir("/".join(db_name.split("/")[:-1]))
-            db = shelve.open(db_name)
+        except FileExistsError:
+            pass
+        db = shelve.open(db_name)
         return db
 
     def insert_new_column(self, column_name: str, column_type: type) -> None:

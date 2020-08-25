@@ -114,7 +114,7 @@ class Core:
     seq_timeout             = 5
     start_command           = /sbin/iptables -I INPUT -s %IP% -p tcp --dport {ssh_port} -j ACCEPT
     tcpflags                = syn
-    cmd_timeout             = 5
+    cmd_timeout             = 30
     stop_command            = /sbin/iptables -D INPUT -s %IP% -p tcp --dport {ssh_port} -j ACCEPT
         """.format(
                 open_sequence=", ".join([str(p) for p in new_sequence]),

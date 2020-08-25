@@ -9,7 +9,6 @@ https://www.digitalocean.com/community/tutorials/how-to-use-port-knocking-to-hid
 """
 
 import sys
-import subprocess
 
 from pks.config import Config
 from pks.utils import Utils
@@ -27,6 +26,7 @@ def main():
         "knockd"
     )
     Core.configure_knockd([100, 200, 300])
+    Utils.create_log_file()
     Utils.start_service("knockd")
 
 

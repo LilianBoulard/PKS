@@ -19,7 +19,7 @@ from .config import Config
 # Setup the configuration for logging.
 logging.basicConfig(
     format='%(asctime)s - %(message)s',  # We add a timestamp to each log entries.
-    level=logging.INFO,
+    level=logging.DEBUG,
     datefmt='%m/%d/%Y %I:%M:%S %p',
     filename="/var/log/pks.log",
     filemode="r+",
@@ -99,7 +99,7 @@ class PKS:
         :param dict update: A Telegram update.
         :return str: A message ID.
         """
-        return update['message']['id']
+        return update['message']['message_id']
 
     def get_user_id(self, update: dict) -> str:
         """
@@ -118,6 +118,8 @@ class PKS:
         return True, None
 
     def process(self, update: dict) -> None:
+        self.__set_commands(update)
+
         chat_text: str = self.get_chat_text(update)
         chat_id: str = self.get_chat_id(update)
         message_id: str = self.get_message_id(update)
@@ -176,6 +178,7 @@ class PKS:
                         else:
                             upd_time = current_update['message']['date']
                             if upd_txt.startswith("/") and (int(time.time()) - upd_time) < Config.telegram_timeout:
+                                logging.debug(current_update)
                                 self.process(current_update)
                     except SystemExit:
                         del self
