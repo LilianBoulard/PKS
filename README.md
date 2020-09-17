@@ -1,24 +1,24 @@
 # PKS
 A Port-Knocking System. 
 
-## Issue
-Opening a server publicly to the Internet implies major risks.
-\
-Along with different ways of securing its access, such as RSA keys for SSH connections, I learned about a system allowing outside connections "on-demand" using a knocking system, that will open a port once a specific sequence of packets is received.
+## Introduction
 
 As Wikipedia states it, "Port knocking is a method of externally opening ports on a firewall by generating a connection attempt on a set of prespecified closed ports. 
 \
 Once a correct sequence of connection attempts is received, the firewall rules are dynamically modified to allow the host which sent the connection attempts to connect over specific port(s)."
+
+## Issue
+
 These systems provide an additionnal layer of security to a system, but are known for having a critical flaw : static sequences.
+\
 Packet sniffing can be used by an attacker to discover the port knock sequences, and therefore get unauthorized access to the server.
 
 ## Solution
+
 This system, written in Python 3, is an attempt to solve this issue by dynamically defining new ports sequences.
-\
-However, it is not flawless ; therefore it is not advised in its current state to use it in a production environment. 
-It's rather an experimental feature to build upon.<br />
 
 ## Future work
+
 All future work is documented in the "project" section of this repo.
 Also, please check "Issues".
 
@@ -51,12 +51,12 @@ sudo crontab -e
 and adding the line
 
 ```bash
-@reboot sudo screen -AmdS pku python3 /var/app/run_server.py
+@reboot sudo screen -AmdS pks python3 /var/app/run_server.py
 ```
 
 Reboot, test, and you're good to go !
 
-To manage the PKU server instance, use the command [`screen`](https://help.ubuntu.com/community/Screen).
+To manage the PKS server instance, use the command [`screen`](https://help.ubuntu.com/community/Screen).
 
 ### Client
 
@@ -81,12 +81,14 @@ The workflow for the client is :
 - Connect to Telegram, and send `/help` to the bot configured in the server part.
 - The list of available commands will appear.
 - Send `/generate` to the bot, it will answer a series of ports.
-- Prepare your SSH shell (or such), then launch the PKS client, enter the three ports (one by one), and press enter. You will then have about 30 seconds to initiate connection. The port will close itself after this delay.
+- Prepare your SSH shell (or such), then launch the PKS client, enter the three ports (one by one), and press enter. You will then have about 30 seconds to initiate connection. The port will close automatically after this delay.
 
 ## Contributing
+
 If you want to contribute, please fork this repo and/or send pull requests. Thank you.<br />
 
 ## Supporting
+
 If you want to support me, you can send some kind messages via [my website](https://phaide.net/contact)<br />
 
 And perhaps, consider making a donation<br />
