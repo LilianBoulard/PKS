@@ -86,10 +86,3 @@ The workflow for the client is :
 ## Contributing
 
 If you want to contribute, please fork this repo and/or send pull requests. Thank you.<br />
-
-## Supporting
-
-If you want to support me, you can send some kind messages via [my website](https://phaide.net/contact)<br />
-
-With love,<br />
-Phaide.
