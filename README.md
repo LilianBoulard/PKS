@@ -1,5 +1,5 @@
 # PKS
-A Port Knocking System. 
+A dynamic Port Knocking System. 
 
 ## Introduction
 
@@ -36,7 +36,7 @@ Next, modify the file `Server/pks/config.py` to fit your needs.
 
 Next, follow [this tutorial](https://www.digitalocean.com/community/tutorials/how-to-use-port-knocking-to-hide-your-ssh-daemon-from-attackers-on-ubuntu) (also available in the docstring of the file `Server/setup.py`) and configure your server by following along the first part (IPTables).
 
-*Note: be careful when modifying your iptables, espacially if you're connected via SSH.*  
+*Note: be careful when modifying your iptables, especially if you're connected via SSH.*  
 
 When installing `iptables-persistent`, the service is automatically launched, but you need to configure the saved rules with the command
 
