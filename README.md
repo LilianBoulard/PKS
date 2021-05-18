@@ -9,7 +9,7 @@ As Wikipedia states it:
 
 ## Issue
 
-These systems provide an additionnal layer of security to a system (namely *security throuygh obscurity*), but are known to have a critical flaw : static sequences.  
+These systems provide an additionnal layer of security to a system (namely *security through obscurity*), but are known to have a critical flaw : static sequences.  
 For instance, packet sniffing could be used by an attacker to discover the port knock sequences, and therefore get unauthorized access to the server.
 
 ## Solution
